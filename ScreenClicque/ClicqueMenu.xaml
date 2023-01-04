@@ -1,0 +1,35 @@
+<Window x:Class="ScreenClicque.ClicqueMenu"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:ScreenClicque"
+        xmlns:tb="http://www.hardcodet.net/taskbar"
+        mc:Ignorable="d"
+        Title="ClicqueMenu"
+        
+        WindowStyle="None"
+        WindowState="Maximized"
+        Topmost="True"
+        ShowInTaskbar="False"
+        AllowsTransparency="True"
+        Background="Transparent">
+    
+    <Grid>
+        <tb:TaskbarIcon
+            Visibility="Visible"
+            Name="TrayTaskBar"
+            ToolTipText="ScreenClique">
+            
+            <tb:TaskbarIcon.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Name="QuitMenuItem" Header="Quit" />
+                </ContextMenu>
+            </tb:TaskbarIcon.ContextMenu>
+        </tb:TaskbarIcon>
+        
+        <Canvas Name="ClicquesCanvas">
+
+        </Canvas>
+    </Grid>
+</Window>
