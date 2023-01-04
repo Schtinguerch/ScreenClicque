@@ -110,5 +110,38 @@ public class LetterPlacer
         }
     }
 
-    
+    private void WindowOnKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            return;
+        }
+
+        var pressedKey = e.Key.ToString();
+        if (pressedKey.Length > 1)
+        {
+            pressedKey = pressedKey
+                .Replace("D", "")
+                .Replace("Oem1", ";")
+                .Replace("Oem2", "/")
+                .Replace("Oem7", "\"");
+        }
+        
+        _pressedShortCut += pressedKey;
+        
+
+        var hotKeyIndex = _letters.FindIndex(l => l.LettersCharacter == _pressedShortCut);
+        if (hotKeyIndex == -1)
+        {
+            if (_pressedShortCut.Length > _maxShortcutLength)
+            {
+                TargetWindow.Hide();
+            }
+            
+            return;
+        }
+
+        TargetWindow.Hide();
+        Mouser.ClickAt(_locations[hotKeyIndex]);
+    }
 }
