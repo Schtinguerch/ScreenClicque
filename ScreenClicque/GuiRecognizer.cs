@@ -12,7 +12,36 @@ namespace ScreenClicque;
 
 public class GuiRecognizer
 {
+    public List<Point> GetMinimumClickPoints()
+    {
+        var sortedPoints = GetClickPoints().OrderBy(p => p.Y).ThenBy(p => p.X).ToList();
+        return sortedPoints;
+    }
     
+    public List<Point> GetClickPoints(bool tryCompress = false, bool tryBlur = false)
+    {
+        var screenshot = GetScreenshot();
+        var thresholdedImage = ProcessedImage(screenshot, tryCompress, tryBlur);
+        var (contours, hierarchy) = FindContours(thresholdedImage);
+        
+        var points = new List<Point>();
+        var lastPoint = new Point();
+
+        for (var i = 0; i < contours.Size; i += 1)
+        {
+            var (isSuitable, bounds) = AnalyzeContour(contours[i], ref lastPoint);
+            if (!isSuitable)
+            {
+                continue;
+            }
+
+            points.Add(lastPoint);
+            CvInvoke.Rectangle(screenshot, bounds, new MCvScalar(0, 255, 0), 1);
+        }
+
+        CvInvoke.Imshow("test", screenshot);
+        return points;
+    }
 
     //Send "Hello" to the Uncle Bob
     private (bool, Rectangle) AnalyzeContour(VectorOfPoint contour, ref Point previousCenter)
