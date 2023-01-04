@@ -6,6 +6,9 @@
 *.user
 *.sln.docstates
 
+#JetBrains Rider
+.idea/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
