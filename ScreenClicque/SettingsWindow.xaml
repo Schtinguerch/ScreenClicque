@@ -1,0 +1,62 @@
+<Window x:Class="ScreenClicque.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:ScreenClicque"
+        mc:Ignorable="d"
+        Title="SettingsWindow" Height="450" Width="800">
+    
+    <Grid
+        Width="800"
+        HorizontalAlignment="Center">
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        
+        <StackPanel
+            Name="RecognizerSettingsStackPanel"
+            Margin="12"
+            Grid.Column="0">
+            
+            <TextBlock Text="Minimum shape area"></TextBlock>
+            <TextBox Text="{Binding MinShapeArea}"></TextBox>
+            
+            <TextBlock Text="Maximum shape area"></TextBlock>
+            <TextBox Text="{Binding MaxShapeArea}"></TextBox>
+            
+            <CheckBox Content="Blur image" IsChecked="{Binding UseBlur}"></CheckBox>
+            <CheckBox Content="Compress image" IsChecked="{Binding UseImageCompression}"></CheckBox>
+            
+            <Button
+                Name="SaveRecognizerSettingsButton"
+                Content="Save">
+            </Button>
+        </StackPanel>
+        
+        <StackPanel
+            Name="ImageProcessingSettingsStackPanel"
+            Margin="12"
+            Grid.Column="1">
+            
+            <TextBlock Text="Threshold block size"></TextBlock>
+            <TextBox Text="{Binding ThresholdBlockSize}"></TextBox>
+            
+            <TextBlock Text="Blur kernel size"></TextBlock>
+            <local:XYView DataContext="{Binding BlurKernelSize}"></local:XYView>
+            
+            <TextBlock Text="Blur Sigma"></TextBlock>
+            <local:XYView DataContext="{Binding BlurSigma}"></local:XYView>
+            
+            <TextBlock Text="Compressed image size"></TextBlock>
+            <local:XYView DataContext="{Binding CompressedImageSize}"></local:XYView>
+            
+            <Button
+                Name="SaveImageProcessingSettingsButton"
+                Content="Save">
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>
