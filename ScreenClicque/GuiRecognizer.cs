@@ -7,21 +7,24 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using Point = System.Drawing.Point;
+using Size = System.Drawing.Size;
 
 namespace ScreenClicque;
 
 public class GuiRecognizer
 {
+    private Size _screenSize;
+    
     public List<Point> GetMinimumClickPoints()
     {
         var sortedPoints = GetClickPoints().OrderBy(p => p.Y).ThenBy(p => p.X).ToList();
         return sortedPoints;
     }
     
-    public List<Point> GetClickPoints(bool tryCompress = false, bool tryBlur = false)
+    public List<Point> GetClickPoints()
     {
         var screenshot = GetScreenshot();
-        var thresholdedImage = ProcessedImage(screenshot, tryCompress, tryBlur);
+        var thresholdedImage = ProcessedImage(screenshot);
         var (contours, hierarchy) = FindContours(thresholdedImage);
         
         var points = new List<Point>();
@@ -39,7 +42,11 @@ public class GuiRecognizer
             CvInvoke.Rectangle(screenshot, bounds, new MCvScalar(0, 255, 0), 1);
         }
 
-        CvInvoke.Imshow("test", screenshot);
+        if (CommonIsland.RecognizerSettings.OpenOpenCvWindow)
+        {
+            CvInvoke.Imshow("OpenCV recognition debug", screenshot);
+        }
+        
         return points;
     }
 
@@ -49,14 +56,13 @@ public class GuiRecognizer
         var area = CvInvoke.ContourArea(contour);
         var notSuitableOutput = (false, new Rectangle(0, 0, 0, 0));
 
-        if (area < 80 || area > 200_000)
+        if (area < CommonIsland.RecognizerSettings.MinShapeArea || area > CommonIsland.RecognizerSettings.MaxShapeArea)
         {
             return notSuitableOutput;
         }
 
         var rectangleBounds = CvInvoke.BoundingRectangle(contour);
         var widthRatio = (double) rectangleBounds.Width / rectangleBounds.Height;
-        
         if (rectangleBounds.Height < 7 || rectangleBounds.Width < 7 || widthRatio > 18)
         {
             return notSuitableOutput;
@@ -87,33 +93,43 @@ public class GuiRecognizer
         return (contours, hierarchy);
     }
 
-    private Image<Gray, byte> ProcessedImage(Image<Bgr, byte> sourceImage, bool tryCompress = false, bool tryBlur = false)
+    private Image<Gray, byte> ProcessedImage(Image<Bgr, byte> sourceImage)
     {
         var grayscaledImage = sourceImage.Convert<Gray, byte>();
 
-        if (tryCompress)
+        if (CommonIsland.RecognizerSettings.UseImageCompression)
         {
-            CvInvoke.Resize(grayscaledImage, grayscaledImage, new System.Drawing.Size(960, 540));
-            CvInvoke.Resize(grayscaledImage, grayscaledImage, new System.Drawing.Size(1920, 1080));
+            var compressedSize = CommonIsland.ImageProcessingSettings.CompressedImageSize.ToSize();
+            
+            CvInvoke.Resize(grayscaledImage, grayscaledImage, compressedSize);
+            CvInvoke.Resize(grayscaledImage, grayscaledImage, _screenSize);
         }
 
-        if (tryBlur)
+        if (CommonIsland.RecognizerSettings.UseBlur)
         {
-            CvInvoke.GaussianBlur(grayscaledImage, grayscaledImage, new System.Drawing.Size(3, 3), 3, 3);
+            CvInvoke.GaussianBlur(
+                grayscaledImage, 
+                grayscaledImage, 
+                CommonIsland.ImageProcessingSettings.BlurKernelSize.ToSize(), 
+                CommonIsland.ImageProcessingSettings.BlurSigma.X, 
+                CommonIsland.ImageProcessingSettings.BlurSigma.Y);
         }
 
         var thresholdedImage = grayscaledImage.ThresholdAdaptive(
             new Gray(255),
             AdaptiveThresholdType.MeanC,
             ThresholdType.Binary,
-            5, new Gray(1));
+            CommonIsland.ImageProcessingSettings.ThresholdBlockSize, 
+            new Gray(1));
 
         return thresholdedImage;
     }
     
     private Image<Bgr, byte> GetScreenshot()
     {
-        using var bmp = new Bitmap(1920, 1080);
+        UpdateScreenSize();
+        using var bmp = new Bitmap(_screenSize.Width, _screenSize.Height);
+        
         using (var g = Graphics.FromImage(bmp))
         {
             g.CopyFromScreen(0, 0, 0, 0, bmp.Size);
@@ -122,4 +138,8 @@ public class GuiRecognizer
         var image = bmp.ToImage<Bgr, byte>();
         return image;
     }
+
+    private void UpdateScreenSize() => _screenSize = new Size(
+        (int) SystemParameters.PrimaryScreenWidth,
+        (int) SystemParameters.PrimaryScreenHeight);
 }
