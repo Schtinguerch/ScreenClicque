@@ -15,6 +15,7 @@ public partial class ClicqueMenu : Window
     {
         InitializeComponent();
         QuitMenuItem.Click += (s, e) => Application.Current.Shutdown(0);
+        SettingsMenuItem.Click += (s, e) => new SettingsWindow().Show();
         
         KeyDown += (s, e) =>
         {

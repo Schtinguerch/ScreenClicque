@@ -23,6 +23,7 @@
             
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
+                    <MenuItem Name="SettingsMenuItem" Header="Settings"></MenuItem>
                     <MenuItem Name="QuitMenuItem" Header="Quit" />
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
